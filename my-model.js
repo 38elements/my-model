@@ -10,10 +10,34 @@
             return 'my-required';
         }
 
-        required_message(input) {
+        requiredMessage(input) {
             let label = input.getAttribute('my-label');
             let message = `${label} is required.`;
             return message;
+        }
+
+        setValidateMessage(id, type, message) {
+            if (!this[id]) {
+                this[id] = {};
+            }
+            this[id][type] = message;
+        }
+
+        validateRequired(input) {
+            if (input.nodeName == 'INPUT' && input.type == 'text') {
+                if (input.hasAttribute(this.required) && !input.value) {
+                    return this.requiredMessage(input);
+                }
+            }
+            else if(input.nodeName == 'INPUT' && input.type == 'redio') {
+            }
+            else if(input.nodeName == 'INPUT' && input.type == 'checkbox') {
+            }
+            else if (input.nodeName == 'TEXTAREA') {
+            }
+            else if (input.nodeName == 'SELECT') {
+            }
+            return false;
         }
 
         _collect(selector, attr='value') {
@@ -59,28 +83,16 @@
 
         validate() {
             let result = {};
+            this.collect();
             this._inputIds.forEach((id) => {
                 let input = document.getElementById(id);
                 if (!input) {
                     return;
                 }
-                if (input.nodeName == 'INPUT' && input.type == 'text') {
-                    if (input.hasAttribute(this.required) && !input.value) {
-                        if (!result.id) {
-                            result[id] = {};
-                        }
-                        result[id]['required'] = this.required_message(input);
-                    }
+                let message = this.validateRequired(input);
+                if (message) {
+                    this.setValidateMessage.apply(result, [id, 'required', message]);
                 }
-                else if(input.nodeName == 'INPUT' && input.type == 'redio') {
-                }
-                else if(input.nodeName == 'INPUT' && input.type == 'checkbox') {
-                }
-                else if (input.nodeName == 'TEXTAREA') {
-                }
-                else if (input.nodeName == 'SELECT') {
-                }
-
             });
             return Object.keys(result).length ? result : false;
         }
