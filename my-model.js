@@ -10,9 +10,19 @@
             return 'my-required';
         }
 
+        get email() {
+            return 'my-email';
+        }
+
         requiredMessage(input) {
             let label = input.getAttribute('my-label');
             let message = `${label} is required.`;
+            return message;
+        }
+
+        emailMessage(input) {
+            let label = input.getAttribute('my-label');
+            let message = `${label} is not email address.`;
             return message;
         }
 
@@ -24,18 +34,34 @@
         }
 
         validateRequired(input) {
-            if (input.nodeName == 'INPUT' && input.type == 'text') {
+            if (
+                (input.nodeName == 'INPUT' && input.type == 'text')
+                || input.nodeName == 'TEXTAREA' || input.nodeName == 'SELECT'
+            ) {
                 if (input.hasAttribute(this.required) && !input.value) {
                     return this.requiredMessage(input);
                 }
             }
-            else if(input.nodeName == 'INPUT' && input.type == 'redio') {
+            else if(
+                (input.nodeName == 'INPUT' && input.type == 'radio')
+                || (input.nodeName == 'INPUT' && input.type == 'checkbox')
+            ) {
+                let name = input.name;
+                let type = input.type;
+                let radios = document.querySelectorAll(`input[type='${type}'][name='${name}']`) 
+                let result = Array.from(radios).some((e) => e.checked);
+                if(!result) {
+                    return this.requiredMessage(input);
+                }
             }
-            else if(input.nodeName == 'INPUT' && input.type == 'checkbox') {
-            }
-            else if (input.nodeName == 'TEXTAREA') {
-            }
-            else if (input.nodeName == 'SELECT') {
+            return false;
+        }
+
+        validateEmail(input) {
+            if (input.nodeName == 'INPUT' && input.type == 'text') {
+                if (input.hasAttribute(this.email) && !validator.isEmail(input.value)) {
+                    return this.emailMessage(input);
+                }
             }
             return false;
         }
@@ -51,7 +77,7 @@
         collect() {
             this._inputIds = [];
             this._collect('input[type=text]');
-            this._collect('input[type=redio]', 'checked');
+            this._collect('input[type=radio]', 'checked');
             this._collect('input[type=checkbox]', 'checked');
             this._collect('textarea');
             this._collect('select');
@@ -66,7 +92,7 @@
                 if (input.nodeName == 'INPUT' && input.type == 'text') {
                     input.value = this.get(id);
                 }
-                else if(input.nodeName == 'INPUT' && input.type == 'redio') {
+                else if(input.nodeName == 'INPUT' && input.type == 'radio') {
                     input.checked = this.get(id);
                 }
                 else if(input.nodeName == 'INPUT' && input.type == 'checkbox') {
@@ -81,6 +107,13 @@
             });
         }
 
+        updateResult(result, id, type, message) {
+            if (message) {
+                this.setValidateMessage.apply(result, [id, type, message]);
+            }
+            return result;
+        }
+
         validate() {
             let result = {};
             this.collect();
@@ -90,11 +123,11 @@
                     return;
                 }
                 let message = this.validateRequired(input);
-                if (message) {
-                    this.setValidateMessage.apply(result, [id, 'required', message]);
-                }
+                result = this.updateResult(result, id, 'required', message);
+                message = this.validateEmail(input);
+                result = this.updateResult(result, id, 'email', message);
             });
-            return Object.keys(result).length ? result : false;
+            return Object.keys(result).length ? result : null;
         }
     }
     global.MyModel = MyModel;
