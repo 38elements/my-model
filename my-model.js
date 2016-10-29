@@ -59,7 +59,8 @@
 
         validateEmail(input) {
             if (input.nodeName == 'INPUT' && input.type == 'text') {
-                if (input.hasAttribute(this.email) && !validator.isEmail(input.value)) {
+                if (input.hasAttribute(this.email) && input.value
+                    && !validator.isEmail(input.value)) {
                     return this.emailMessage(input);
                 }
             }
