@@ -14,6 +14,10 @@
             return 'my-email';
         }
 
+        get number() {
+            return 'my-number';
+        }
+
         requiredMessage(input) {
             let label = input.getAttribute('my-label');
             let message = `${label} is required.`;
@@ -23,6 +27,12 @@
         emailMessage(input) {
             let label = input.getAttribute('my-label');
             let message = `${label} is not email address.`;
+            return message;
+        }
+
+        numberMessage(input) {
+            let label = input.getAttribute('my-label');
+            let message = `${label} is not number.`;
             return message;
         }
 
@@ -62,6 +72,16 @@
                 if (input.hasAttribute(this.email) && input.value
                     && !validator.isEmail(input.value)) {
                     return this.emailMessage(input);
+                }
+            }
+            return false;
+        }
+
+        validateNumber(input) {
+            if (input.nodeName == 'INPUT' && input.type == 'text') {
+                if (input.hasAttribute(this.number) && input.value
+                    && !validator.isNumeric(input.value)) {
+                    return this.numberMessage(input);
                 }
             }
             return false;
@@ -127,6 +147,8 @@
                 result = this.updateResult(result, id, 'required', message);
                 message = this.validateEmail(input);
                 result = this.updateResult(result, id, 'email', message);
+                message = this.validateNumber(input);
+                result = this.updateResult(result, id, 'number', message);
             });
             return Object.keys(result).length ? result : null;
         }
