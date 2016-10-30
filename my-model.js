@@ -18,6 +18,10 @@
             return 'my-number';
         }
 
+        get minLength() {
+            return 'my-min-length';
+        }
+
         requiredMessage(input) {
             let label = input.getAttribute('my-label');
             let message = `${label} is required.`;
@@ -33,6 +37,13 @@
         numberMessage(input) {
             let label = input.getAttribute('my-label');
             let message = `${label} is not number.`;
+            return message;
+        }
+
+        minLengthMessage(input) {
+            let label = input.getAttribute('my-label');
+            let length = input.getAttribute('my-min-length');
+            let message = `${label} is not longer than ${length}.`;
             return message;
         }
 
@@ -82,6 +93,18 @@
                 if (input.hasAttribute(this.number) && input.value
                     && !validator.isNumeric(input.value)) {
                     return this.numberMessage(input);
+                }
+            }
+            return false;
+        }
+
+        validateMinLength(input) {
+            if (input.nodeName == 'INPUT' && input.type == 'text') {
+                if (input.hasAttribute(this.minLength) && input.value) {
+                    let min = input.getAttribute(this.minLength) - 0;
+                    if (min > input.value.length) {
+                        return this.minLengthMessage(input);
+                    }
                 }
             }
             return false;
@@ -149,6 +172,8 @@
                 result = this.updateResult(result, id, 'email', message);
                 message = this.validateNumber(input);
                 result = this.updateResult(result, id, 'number', message);
+                message = this.validateMinLength(input);
+                result = this.updateResult(result, id, 'min-length', message);
             });
             return Object.keys(result).length ? result : null;
         }
